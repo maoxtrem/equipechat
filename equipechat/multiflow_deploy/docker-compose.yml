@@ -1,0 +1,153 @@
+
+services:
+  redis:
+    image: redis:latest
+    container_name: redis_container
+    volumes:
+      - redis_data:/data
+    environment:
+      - TZ=America/Sao_Paulo
+    networks:
+      - multiflow_net
+
+  postgres:
+    image: postgres:17
+    container_name: postgres_container
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=equipechat
+      - TZ=America/Sao_Paulo
+    command: >
+      postgres -c shared_buffers=256MB
+               -c effective_cache_size=768MB
+               -c maintenance_work_mem=64MB
+               -c checkpoint_completion_target=0.9
+               -c wal_buffers=16MB
+               -c default_statistics_target=100
+    networks:
+      - multiflow_net
+
+  pgbouncer:
+    image: edoburu/pgbouncer:1.21.0-p2
+    container_name: pgbouncer_container
+    restart: always
+    environment:
+      DB_HOST: postgres
+      DB_USER: admin
+      DB_PASSWORD: "admin"
+      AUTH_TYPE: md5
+      TZ: America/Sao_Paulo
+    depends_on:
+      - postgres
+    networks:
+      - multiflow_net
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: ../multiflow_deploy/Dockerfile_backend
+    container_name: backend_node
+    working_dir: /app
+    restart: always
+    ports:
+      - "8080:8080"   # expuesto para acceso desde el host
+    environment:
+      - TZ=America/Sao_Paulo
+      - NODE_ENV=production
+      - BACKEND_URL=http://localhost:8080
+      - FRONTEND_URL=http://localhost:3000
+      - PORT=8080
+      - DB_DIALECT=postgres
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=admin
+      - DB_PASS=admin
+      - DB_NAME=equipechat
+      - JWT_SECRET=secret
+      - JWT_REFRESH_SECRET=secret
+      - REDIS_URI=redis://redis:6379
+      - TRANSCRIBE_URL=http://transcricao:4002
+      - WEBHOONKS_N8N=true
+    depends_on:
+      - pgbouncer
+      - redis
+    networks:
+      - multiflow_net
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: ../multiflow_deploy/Dockerfile_frontend
+    container_name: frontend_node
+    restart: always
+    ports:
+      - "3000:80"   # expuesto para acceso desde el host
+    environment:
+      - TZ=America/Sao_Paulo
+      - REACT_APP_BACKEND_URL=http://localhost:8080
+    depends_on:
+      - backend
+    networks:
+      - multiflow_net
+
+  transcricao:
+    build:
+      context: ../api_transcricao
+      dockerfile: ../multiflow_deploy/Dockerfile_apitranscricao
+    container_name: trascricao_node
+    restart: always
+    environment:
+      - TZ=America/Sao_Paulo
+    networks:
+      - multiflow_net
+
+  api_oficial:
+    build:
+      context: ../api_oficial
+      dockerfile: ../multiflow_deploy/Dockerfile_apioficial
+    container_name: oficial_node
+    working_dir: /app
+    restart: always
+    environment:
+      - PORT=3000
+      - TOKEN_API_OFICIAL=secret
+      - DATABASE_LINK=postgresql://admin:admin@postgres:5432/equipechat?schema=public
+      - RABBITMQ_ENABLED_GLOBAL=false
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - NAME_ADMIN=SetupAutomatizado
+      - EMAIL_ADMIN=admin@setupautomatizado.com.br
+      - PASSWORD_ADMIN=012345617181920SENHA
+      - JWT_SECRET=nYfyX9hRm5tXzo=
+      - RABBITMQ_URL=amqp://rabbitmq:SENHA@rabbitmq/rabbitmq
+      - URL_BACKEND_MULT100=https://api.multi100.com
+      - REDIS_URI=redis://:123456@127.0.0.1:6379
+      - TOKEN_ADMIN=012345617181920SENHA
+    networks:
+      - multiflow_net
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq_container
+    environment:
+      - RABBITMQ_DEFAULT_USER=rabbitmq
+      - RABBITMQ_DEFAULT_PASS=SENHA
+    networks:
+      - multiflow_net
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+
+networks:
+  multiflow_net:
+    driver: bridge
