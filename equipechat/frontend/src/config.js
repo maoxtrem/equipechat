@@ -1,3 +1,5 @@
+require('dotenv').config(); 
+
 function getConfig(name, defaultValue = null) {
     // 1️⃣ Priorizar variables de entorno de Docker (process.env)
     if (typeof process !== 'undefined' && process.env && process.env[name]) {
