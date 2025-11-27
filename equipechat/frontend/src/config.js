@@ -1,11 +1,13 @@
 function getConfig(name, defaultValue = null) {
     // 1️⃣ Priorizar variables de entorno de Docker (process.env)
     if (typeof process !== 'undefined' && process.env && process.env[name]) {
+        console.log("variable de getconfi doker", process.env[name])
         return process.env[name];
     }
 
     // 2️⃣ Si no existen en process.env, usar window.ENV (para frontend runtime)
     if (typeof window !== 'undefined' && window.ENV !== undefined) {
+           console.log("variable de getconfi windos", window.ENV[name] || defaultValue)
         return window.ENV[name] || defaultValue;
     }
 
@@ -17,9 +19,10 @@ function getConfig(name, defaultValue = null) {
 export function getBackendUrl() {
     // Default to localhost:8080 if not configured
     const url = getConfig('REACT_APP_BACKEND_URL', 'http://backend:8080');
-    
+    console.log("variable de getBackendUrl", url)
     // If we're in development and no URL is set, use relative path (proxy will handle it)
     if (!url && process.env.NODE_ENV === 'development') {
+            console.log("if node_env")
         return '';
     }
     
