@@ -2,7 +2,7 @@ import axios from "axios";
 import { getBackendUrl } from "../config";
 
 // Obter a URL do backend
-const backendUrl = getBackendUrl() || "http://localhost:8080";
+const backendUrl = getBackendUrl() || "http://backend:8080";
 
 console.log("Backend URL configurada:", backendUrl);
 
