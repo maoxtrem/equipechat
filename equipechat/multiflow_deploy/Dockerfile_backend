@@ -18,13 +18,21 @@ WORKDIR /app
 
 # Install utilities (only essential ones)
 RUN apt-get update && apt-get install -y \
-    curl ca-certificates \
+  curl ca-certificates vim \
   && rm -rf /var/lib/apt/lists/*
+RUN  npm install sequelize pg pg-hstore \
+    && npx sequelize-cli init \
+     && rm -rf /var/lib/apt/lists/*
+
+COPY   .sequelizerc .
+COPY   config.js /app/config/config.js
 
 # Copy build artifacts and dependencies
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
+
+RUN rm  /app/config/config.json
 
 EXPOSE 8080
 CMD ["node", "dist/server.js"]

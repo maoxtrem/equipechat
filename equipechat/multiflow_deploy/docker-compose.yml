@@ -76,6 +76,7 @@ services:
     depends_on:
       - pgbouncer
       - redis
+    command: sh -c "npx sequelize-cli db:migrate && node dist/server.js"
     networks:
       - multiflow_net
 
