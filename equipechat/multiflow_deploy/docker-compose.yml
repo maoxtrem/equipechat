@@ -90,7 +90,7 @@ services:
       - "3000:80"   # expuesto para acceso desde el host
     environment:
       - TZ=America/Sao_Paulo
-      - REACT_APP_BACKEND_URL=http://localhost:8080
+      - REACT_APP_BACKEND_URL=http://72.61.64.220:8080
     depends_on:
       - backend
     networks:
