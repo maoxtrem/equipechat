@@ -1,16 +1,18 @@
 function getConfig(name, defaultValue = null) {
-    // If inside a docker container, use window.ENV
-    if (window.ENV !== undefined) {
-        return window.ENV[name] || defaultValue;
-    }
-
-    // Try process.env if available
+    // 1️⃣ Priorizar variables de entorno de Docker (process.env)
     if (typeof process !== 'undefined' && process.env && process.env[name]) {
         return process.env[name];
     }
 
+    // 2️⃣ Si no existen en process.env, usar window.ENV (para frontend runtime)
+    if (typeof window !== 'undefined' && window.ENV !== undefined) {
+        return window.ENV[name] || defaultValue;
+    }
+
+    // 3️⃣ Valor por defecto
     return defaultValue;
 }
+
 
 export function getBackendUrl() {
     // Default to localhost:8080 if not configured
