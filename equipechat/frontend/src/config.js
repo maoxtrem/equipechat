@@ -1,8 +1,4 @@
 
-const dotenv = require("dotenv");
-
-dotenv.config();
-
 function getConfig(name, defaultValue = null) {
     // 1️⃣ Priorizar variables de entorno de Docker (process.env)
     if (typeof process !== 'undefined' && process.env && process.env[name]) {
@@ -24,7 +20,7 @@ function getConfig(name, defaultValue = null) {
 export function getBackendUrl() {
     // Default to localhost:8080 if not configured
     const url = getConfig('REACT_APP_BACKEND_URL', 'http://localhost:8080');
-    console.log("variable de getBackendUrl", url)
+    console.log("variable de getBackendUrl", process.env.REACT_APP_BACKEND_URL)
     // If we're in development and no URL is set, use relative path (proxy will handle it)
     if (!url && process.env.NODE_ENV === 'development') {
             console.log("if node_env")
