@@ -46,16 +46,6 @@ app.set("queues", {
   sendScheduledMessages
 });
 
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  'http://localhost:3000',
-  'http://localhost:3001', 
-  'http://127.0.0.1:3000',
-  'http://127.0.0.1:3001'
-].filter(Boolean);
-
-console.log("🔧 CORS - Origens permitidas:", allowedOrigins);
-
 // Configuração do BullBoard
 if (String(process.env.BULL_BOARD).toLocaleLowerCase() === 'true' && process.env.REDIS_URI_ACK !== '') {
   BullBoard.setQueues(BullQueue.queues.map(queue => queue && queue.bull));
@@ -87,19 +77,7 @@ app.use(bodyParser.urlencoded({ limit: '5mb', extended: true }));
 app.use(
   cors({
     credentials: true,
-    origin: function (origin, callback) {
-      // Permitir requisições sem origin (Postman, Insomnia, servidor)
-      if (!origin) {
-        return callback(null, true);
-      }
-      
-      if (allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        console.warn(`⚠️ CORS bloqueou origem não permitida: ${origin}`);
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept-Language', 'X-User-Language'],
     exposedHeaders: ['X-Total-Count', 'X-User-Language'],
@@ -132,3 +110,4 @@ app.use(async (err: Error, req: Request, res: Response, _: NextFunction) => {
 });
 
 export default app;
+
