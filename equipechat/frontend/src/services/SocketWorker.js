@@ -1,6 +1,9 @@
 import io from "socket.io-client";
 import api from "../services/api";
+import { getBackendUrl } from "../config";
 
+// Obter a URL do backend
+const backendUrl = getBackendUrl() || "http://localhost:8080";
 
 class SocketWorker {
   constructor(companyId , userId) {
@@ -21,7 +24,7 @@ class SocketWorker {
   }
 
   configureSocket() {
-    this.socket = io(`${process.env.REACT_APP_BACKEND_URL}/${this?.companyId}` , {
+    this.socket = io(`${backendUrl}/${this?.companyId}` , {
       autoConnect: true,
       reconnection: true,
       reconnectionDelay: 1000,
