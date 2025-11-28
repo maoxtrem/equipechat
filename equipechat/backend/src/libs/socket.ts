@@ -14,7 +14,15 @@ let io: SocketIO;
 export const initIO = (httpServer: Server): SocketIO => {
   io = new SocketIO(httpServer, {
     cors: {
-      origin: process.env.FRONTEND_URL
+      origin: [
+        process.env.FRONTEND_URL,
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
+        "http://72.61.64.220:3000", // Example IP from previous context
+        "http://72.61.64.220:3001" // Example IP from previous context
+      ].filter(Boolean)
     }
   });
 
